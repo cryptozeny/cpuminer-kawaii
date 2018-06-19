@@ -1058,7 +1058,9 @@ static int share_result(int result, struct work *work, const char *reason)
 	}
 
 	if (opt_showdiff)
-		sprintf(suppl, "diff %.3f", sharediff);
+		// toFixed 3 to 8
+		// sprintf(suppl, "diff %.3f", sharediff);
+		sprintf(suppl, "diff %.8f", sharediff);
 	else // accepted percent
 		sprintf(suppl, "%.2f%%", 100. * accepted_count / (accepted_count + rejected_count));
 
@@ -1074,7 +1076,9 @@ static int share_result(int result, struct work *work, const char *reason)
 			suppl, s, flag);
 		break;
 	default:
-		sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", hashrate / 1000.0);
+		// toFixed
+		// sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", hashrate / 1000.0);
+		sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.4f", hashrate / 1000.0);
 		applog(LOG_NOTICE, "accepted: %lu/%lu (%s), %s kH/s %s",
 			accepted_count, accepted_count + rejected_count,
 			suppl, s, flag);
@@ -1863,7 +1867,9 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 			// store for api stats
 			stratum_diff = sctx->job.diff;
 			if (opt_showdiff && work->targetdiff != stratum_diff)
-				snprintf(sdiff, 32, " (%.5f)", work->targetdiff);
+				// toFixed
+				// snprintf(sdiff, 32, " (%.5f)", work->targetdiff);
+				snprintf(sdiff, 32, " (%.8f)", work->targetdiff);
 			applog(LOG_WARNING, "Stratum difficulty set to %g%s", stratum_diff, sdiff);
 		}
 	}
@@ -2431,7 +2437,9 @@ static void *miner_thread(void *userdata)
 				applog(LOG_INFO, "CPU #%d: %.2f H/s", thr_id, thr_hashrates[thr_id]);
 				break;
 			default:
-				sprintf(s, thr_hashrates[thr_id] >= 1e6 ? "%.0f" : "%.2f",
+				// toFixed
+				// sprintf(s, thr_hashrates[thr_id] >= 1e6 ? "%.0f" : "%.2f",
+				sprintf(s, thr_hashrates[thr_id] >= 1e6 ? "%.0f" : "%.4f",
 						thr_hashrates[thr_id] / 1e3);
 				applog(LOG_INFO, "CPU #%d: %s kH/s", thr_id, s);
 				break;
@@ -2452,7 +2460,9 @@ static void *miner_thread(void *userdata)
 					applog(LOG_NOTICE, "Total: %s H/s", s);
 					break;
 				default:
-					sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", hashrate / 1000);
+					// toFixed
+					// sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", hashrate / 1000);
+					sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.4f", hashrate / 1000);
 					applog(LOG_NOTICE, "Total: %s kH/s", s);
 					break;
 				}
@@ -2743,7 +2753,10 @@ static void *stratum_thread(void *userdata)
 				if (!opt_quiet && last_bloc_height != stratum.bloc_height) {
 					last_bloc_height = stratum.bloc_height;
 					if (net_diff > 0.)
-						applog(LOG_BLUE, "%s block %d, diff %.3f", algo_names[opt_algo],
+						// toFixed
+						// yescrypt block 1256575, diff 0.248
+						// applog(LOG_BLUE, "%s block %d, diff %.3f", algo_names[opt_algo],
+						applog(LOG_BLUE, "%s block %d, diff %.8f", algo_names[opt_algo],
 							stratum.bloc_height, net_diff);
 					else
 						applog(LOG_BLUE, "%s %s block %d", short_url, algo_names[opt_algo],
