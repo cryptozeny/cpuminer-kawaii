@@ -7,7 +7,14 @@ cd && sudo apt-get install build-essential autoconf automake libssl-dev libcurl4
 Intel or Ryzen
 ==============
  
- cd && sudo apt-get install build-essential autoconf automake libssl-dev libcurl4-openssl-dev libjansson-dev zlib1g-dev screen git && git clone https://github.com/cryptozeny/cpuminer-kawaii.git && cd cpuminer-kawaii && ./autogen.sh	&& ./nomacro.pl && ./configure CFLAGS="*-march=native*" --with-crypto --with-curl && make
+ cd && sudo apt-get install build-essential autoconf automake libssl-dev libcurl4-openssl-dev libjansson-dev zlib1g-dev screen git && git clone https://github.com/cryptozeny/cpuminer-kawaii.git && cd cpuminer-kawaii && ./autogen.sh	&& ./nomacro.pl && ./configure CFLAGS="*-march=native*" --with-crypto --with-curl && make -j8 && ./cpuminer -a yescrypt -o stratum+tcp://zny.mofumofu.me:3331 -u ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v
+ 
+ 
+ Run
+ ===
+ ./cpuminer -a yescrypt -o stratum+tcp://zny.mofumofu.me:3331 -u ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v
+
+
 
 
 
