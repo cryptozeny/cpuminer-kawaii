@@ -1,5 +1,6 @@
-cpuminer-kawaii : a fork of tpruvot's cpuminer-multi 1.3.4
-==========================================================
+cpuminer-kawaii
+===============
+A fork of [tpruvot's cpuminer-multi](https://github.com/tpruvot/cpuminer-multi) 1.3.4
 
 Raspberry Pi
 ============
