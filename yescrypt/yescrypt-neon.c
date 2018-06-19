@@ -1312,7 +1312,8 @@ int yescrypt_kdf(
  		S = (uint8_t *)XY + XY_size;
 
  	if (t || flags) {
- 		SHA256_CTX ctx;
+ 		// SHA256_CTX ctx;
+		SHA256_CTX_Y ctx;
  		SHA256_Init(&ctx);
  		SHA256_Update(&ctx, passwd, passwdlen);
  		SHA256_Final(sha256, &ctx);
@@ -1363,7 +1364,8 @@ int yescrypt_kdf(
  	if ((t || flags) && buflen == sizeof(sha256)) {
  		/* Compute ClientKey */
  		{
- 			HMAC_SHA256_CTX ctx;
+ 			// HMAC_SHA256_CTX ctx;
+			HMAC_SHA256_CTX_Y ctx;
  			HMAC_SHA256_Init(&ctx, buf, buflen);
  			HMAC_SHA256_Update(&ctx, "Client Key", 10);
  			HMAC_SHA256_Final(sha256, &ctx);
