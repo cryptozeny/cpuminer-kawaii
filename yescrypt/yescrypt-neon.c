@@ -1094,26 +1094,57 @@ smix(uint8_t * B, size_t r, uint32_t N, uint32_t p, uint32_t t,
 
 
 
+// 참고.시작
+
+// yescrypt_bsty(
+// 	(uint8_t*)input,
+// 	len,
+// 	(uint8_t*)input,
+// 	len,
+// 	2048,
+// 	8,
+// 	1,
+// 	(uint8_t*)output,
+// 	32
+// );
+
+// yescrypt_client_key = "Client Key";
+// yescrypt_client_key_len = 10;
+// YESCRYPT_N = 2048;
+// YESCRYPT_R = 8;
+// YESCRYPT_P = 1;
+
+// 참고.끝
+
 
 
 
 // 테스트
- static int
- yescrypt_kdf(
-	 const yescrypt_shared_t * shared,
-	 yescrypt_local_t * local,
-	 const uint8_t * passwd,
-	 size_t passwdlen,
-	 const uint8_t * salt,
-	 size_t saltlen,
-	 uint64_t N,
-	 uint32_t r,
-	 uint32_t p,
-	 uint32_t t,
-	 yescrypt_flags_t flags,
-	 uint8_t * buf,
-	 size_t buflen
- )
+static int
+yescrypt_kdf(
+	const yescrypt_shared_t * shared,
+	yescrypt_local_t * local,
+	const uint8_t * passwd,
+	size_t passwdlen,
+	const uint8_t * salt,
+	size_t saltlen,
+
+	// uint64_t N,
+	// uint32_t r,
+	// uint32_t p,
+	// uint32_t t,
+
+	2048 N,
+	8 r,
+	1 p,
+	0 t,
+	
+	yescrypt_flags_t flags,
+	uint8_t * buf,
+	size_t buflen
+)
+
+
  {
  	yescrypt_region_t tmp;
  	uint64_t NROM;
