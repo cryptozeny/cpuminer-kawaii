@@ -1090,231 +1090,248 @@ smix(uint8_t * B, size_t r, uint32_t N, uint32_t p, uint32_t t,
  *
  * Return 0 on success; or -1 on error.
  */
-static int
-yescrypt_kdf(const yescrypt_shared_t * shared, yescrypt_local_t * local,
-    const uint8_t * passwd, size_t passwdlen,
-    const uint8_t * salt, size_t saltlen,
-    uint64_t N, uint32_t r, uint32_t p, uint32_t t, yescrypt_flags_t flags,
-    uint8_t * buf, size_t buflen)
-{
-	yescrypt_region_t tmp;
-	uint64_t NROM;
-	size_t B_size, V_size, XY_size, need;
-	uint8_t * B, * S;
-	salsa20_blk_t * V, * XY;
-	uint8_t sha256[32];
 
-	/*
-	 * YESCRYPT_PARALLEL_SMIX is a no-op at p = 1 for its intended purpose,
-	 * so don't let it have side-effects.  Without this adjustment, it'd
-	 * enable the SHA-256 password pre-hashing and output post-hashing,
-	 * because any deviation from classic scrypt implies those.
-	 */
-	if (p == 1)
-		flags &= ~YESCRYPT_PARALLEL_SMIX;
 
-	/* Sanity-check parameters */
-	if (flags & ~YESCRYPT_KNOWN_FLAGS) {
-		errno = EINVAL;
-		return -1;
-	}
-#if SIZE_MAX > UINT32_MAX
-	if (buflen > (((uint64_t)(1) << 32) - 1) * 32) {
-		errno = EFBIG;
-		return -1;
-	}
-#endif
-	if ((uint64_t)(r) * (uint64_t)(p) >= (1 << 30)) {
-		errno = EFBIG;
-		return -1;
-	}
-	if (N > UINT32_MAX) {
-		errno = EFBIG;
-		return -1;
-	}
-	if (((N & (N - 1)) != 0) || (N <= 7) || (r < 1) || (p < 1)) {
-		errno = EINVAL;
-		return -1;
-	}
-	if ((flags & YESCRYPT_PARALLEL_SMIX) && (N / p <= 7)) {
-		errno = EINVAL;
-		return -1;
-	}
-	if ((r > SIZE_MAX / 256 / p) ||
-	    (N > SIZE_MAX / 128 / r)) {
-		errno = ENOMEM;
-		return -1;
-	}
-#ifdef _OPENMP
-	if (!(flags & YESCRYPT_PARALLEL_SMIX) &&
-	    (N > SIZE_MAX / 128 / (r * p))) {
-		errno = ENOMEM;
-		return -1;
-	}
-#endif
-	if ((flags & YESCRYPT_PWXFORM) &&
-#ifndef _OPENMP
-	    (flags & YESCRYPT_PARALLEL_SMIX) &&
-#endif
-	    p > SIZE_MAX / S_SIZE_ALL) {
-		errno = ENOMEM;
-		return -1;
-	}
 
-	NROM = 0;
-	if (shared->shared1.aligned) {
-		NROM = shared->shared1.aligned_size / ((size_t)128 * r);
-		if (NROM > UINT32_MAX) {
-			errno = EFBIG;
-			return -1;
-		}
-		if (((NROM & (NROM - 1)) != 0) || (NROM <= 7) ||
-		    !(flags & YESCRYPT_RW)) {
-			errno = EINVAL;
-			return -1;
-		}
-	}
 
-	/* Allocate memory */
-	V = NULL;
-	V_size = (size_t)128 * r * N;
-#ifdef _OPENMP
-	if (!(flags & YESCRYPT_PARALLEL_SMIX))
-		V_size *= p;
-#endif
-	need = V_size;
-	if (flags & __YESCRYPT_INIT_SHARED) {
-		if (local->aligned_size < need) {
-			if (local->base || local->aligned ||
-			    local->base_size || local->aligned_size) {
-				errno = EINVAL;
-				return -1;
-			}
-			if (!alloc_region(local, need))
-				return -1;
-		}
-		V = (salsa20_blk_t *)local->aligned;
-		need = 0;
-	}
-	B_size = (size_t)128 * r * p;
-	need += B_size;
-	if (need < B_size) {
-		errno = ENOMEM;
-		return -1;
-	}
-	XY_size = (size_t)256 * r;
-#ifdef _OPENMP
-	XY_size *= p;
-#endif
-	need += XY_size;
-	if (need < XY_size) {
-		errno = ENOMEM;
-		return -1;
-	}
-	if (flags & YESCRYPT_PWXFORM) {
-		size_t S_size = S_SIZE_ALL;
-#ifdef _OPENMP
-		S_size *= p;
-#else
-		if (flags & YESCRYPT_PARALLEL_SMIX)
-			S_size *= p;
-#endif
-		need += S_size;
-		if (need < S_size) {
-			errno = ENOMEM;
-			return -1;
-		}
-	}
-	if (flags & __YESCRYPT_INIT_SHARED) {
-		if (!alloc_region(&tmp, need))
-			return -1;
-		B = (uint8_t *)tmp.aligned;
-		XY = (salsa20_blk_t *)((uint8_t *)B + B_size);
-	} else {
-		init_region(&tmp);
-		if (local->aligned_size < need) {
-			if (free_region(local))
-				return -1;
-			if (!alloc_region(local, need))
-				return -1;
-		}
-		B = (uint8_t *)local->aligned;
-		V = (salsa20_blk_t *)((uint8_t *)B + B_size);
-		XY = (salsa20_blk_t *)((uint8_t *)V + V_size);
-	}
-	S = NULL;
-	if (flags & YESCRYPT_PWXFORM)
-		S = (uint8_t *)XY + XY_size;
 
-	if (t || flags) {
-		SHA256_CTX ctx;
-		SHA256_Init(&ctx);
-		SHA256_Update(&ctx, passwd, passwdlen);
-		SHA256_Final(sha256, &ctx);
-		passwd = sha256;
-		passwdlen = sizeof(sha256);
-	}
 
-	/* 1: (B_0 ... B_{p-1}) <-- PBKDF2(P, S, 1, p * MFLen) */
-	PBKDF2_SHA256(passwd, passwdlen, salt, saltlen, 1, B, B_size);
 
-	if (t || flags)
-		memcpy(sha256, B, sizeof(sha256));
 
-	if (p == 1 || (flags & YESCRYPT_PARALLEL_SMIX)) {
-		smix(B, r, N, p, t, flags, V, NROM, shared, XY, S);
-	} else {
-		uint32_t i;
 
-		/* 2: for i = 0 to p - 1 do */
-#ifdef _OPENMP
-#pragma omp parallel for default(none) private(i) shared(B, r, N, p, t, flags, V, NROM, shared, XY, S)
-#endif
-		for (i = 0; i < p; i++) {
-			/* 3: B_i <-- MF(B_i, N) */
-#ifdef _OPENMP
-			smix(&B[(size_t)128 * r * i], r, N, 1, t, flags,
-			    &V[(size_t)2 * r * i * N],
-			    NROM, shared,
-			    &XY[(size_t)4 * r * i],
-			    S ? &S[S_SIZE_ALL * i] : S);
-#else
-			smix(&B[(size_t)128 * r * i], r, N, 1, t, flags, V,
-			    NROM, shared, XY, S);
-#endif
-		}
-	}
 
-	/* 5: DK <-- PBKDF2(P, B, 1, dkLen) */
-	PBKDF2_SHA256(passwd, passwdlen, B, B_size, 1, buf, buflen);
 
-	/*
-	 * Except when computing classic scrypt, allow all computation so far
-	 * to be performed on the client.  The final steps below match those of
-	 * SCRAM (RFC 5802), so that an extension of SCRAM (with the steps so
-	 * far in place of SCRAM's use of PBKDF2 and with SHA-256 in place of
-	 * SCRAM's use of SHA-1) would be usable with yescrypt hashes.
-	 */
-	if ((t || flags) && buflen == sizeof(sha256)) {
-		/* Compute ClientKey */
-		{
-			HMAC_SHA256_CTX ctx;
-			HMAC_SHA256_Init(&ctx, buf, buflen);
-			HMAC_SHA256_Update(&ctx, "Client Key", 10);
-			HMAC_SHA256_Final(sha256, &ctx);
-		}
-		/* Compute StoredKey */
-		{
-			SHA256_CTX ctx;
-			SHA256_Init(&ctx);
-			SHA256_Update(&ctx, sha256, sizeof(sha256));
-			SHA256_Final(buf, &ctx);
-		}
-	}
 
-	if (free_region(&tmp))
-		return -1;
 
-	/* Success! */
-	return 0;
-}
+
+
+// 제거.yescrypt.h에 있음
+
+// static int
+// yescrypt_kdf(const yescrypt_shared_t * shared, yescrypt_local_t * local,
+//     const uint8_t * passwd, size_t passwdlen,
+//     const uint8_t * salt, size_t saltlen,
+//     uint64_t N, uint32_t r, uint32_t p, uint32_t t, yescrypt_flags_t flags,
+//     uint8_t * buf, size_t buflen)
+// {
+// 	yescrypt_region_t tmp;
+// 	uint64_t NROM;
+// 	size_t B_size, V_size, XY_size, need;
+// 	uint8_t * B, * S;
+// 	salsa20_blk_t * V, * XY;
+// 	uint8_t sha256[32];
+//
+// 	/*
+// 	 * YESCRYPT_PARALLEL_SMIX is a no-op at p = 1 for its intended purpose,
+// 	 * so don't let it have side-effects.  Without this adjustment, it'd
+// 	 * enable the SHA-256 password pre-hashing and output post-hashing,
+// 	 * because any deviation from classic scrypt implies those.
+// 	 */
+// 	if (p == 1)
+// 		flags &= ~YESCRYPT_PARALLEL_SMIX;
+//
+// 	/* Sanity-check parameters */
+// 	if (flags & ~YESCRYPT_KNOWN_FLAGS) {
+// 		errno = EINVAL;
+// 		return -1;
+// 	}
+// #if SIZE_MAX > UINT32_MAX
+// 	if (buflen > (((uint64_t)(1) << 32) - 1) * 32) {
+// 		errno = EFBIG;
+// 		return -1;
+// 	}
+// #endif
+// 	if ((uint64_t)(r) * (uint64_t)(p) >= (1 << 30)) {
+// 		errno = EFBIG;
+// 		return -1;
+// 	}
+// 	if (N > UINT32_MAX) {
+// 		errno = EFBIG;
+// 		return -1;
+// 	}
+// 	if (((N & (N - 1)) != 0) || (N <= 7) || (r < 1) || (p < 1)) {
+// 		errno = EINVAL;
+// 		return -1;
+// 	}
+// 	if ((flags & YESCRYPT_PARALLEL_SMIX) && (N / p <= 7)) {
+// 		errno = EINVAL;
+// 		return -1;
+// 	}
+// 	if ((r > SIZE_MAX / 256 / p) ||
+// 	    (N > SIZE_MAX / 128 / r)) {
+// 		errno = ENOMEM;
+// 		return -1;
+// 	}
+// #ifdef _OPENMP
+// 	if (!(flags & YESCRYPT_PARALLEL_SMIX) &&
+// 	    (N > SIZE_MAX / 128 / (r * p))) {
+// 		errno = ENOMEM;
+// 		return -1;
+// 	}
+// #endif
+// 	if ((flags & YESCRYPT_PWXFORM) &&
+// #ifndef _OPENMP
+// 	    (flags & YESCRYPT_PARALLEL_SMIX) &&
+// #endif
+// 	    p > SIZE_MAX / S_SIZE_ALL) {
+// 		errno = ENOMEM;
+// 		return -1;
+// 	}
+//
+// 	NROM = 0;
+// 	if (shared->shared1.aligned) {
+// 		NROM = shared->shared1.aligned_size / ((size_t)128 * r);
+// 		if (NROM > UINT32_MAX) {
+// 			errno = EFBIG;
+// 			return -1;
+// 		}
+// 		if (((NROM & (NROM - 1)) != 0) || (NROM <= 7) ||
+// 		    !(flags & YESCRYPT_RW)) {
+// 			errno = EINVAL;
+// 			return -1;
+// 		}
+// 	}
+//
+// 	/* Allocate memory */
+// 	V = NULL;
+// 	V_size = (size_t)128 * r * N;
+// #ifdef _OPENMP
+// 	if (!(flags & YESCRYPT_PARALLEL_SMIX))
+// 		V_size *= p;
+// #endif
+// 	need = V_size;
+// 	if (flags & __YESCRYPT_INIT_SHARED) {
+// 		if (local->aligned_size < need) {
+// 			if (local->base || local->aligned ||
+// 			    local->base_size || local->aligned_size) {
+// 				errno = EINVAL;
+// 				return -1;
+// 			}
+// 			if (!alloc_region(local, need))
+// 				return -1;
+// 		}
+// 		V = (salsa20_blk_t *)local->aligned;
+// 		need = 0;
+// 	}
+// 	B_size = (size_t)128 * r * p;
+// 	need += B_size;
+// 	if (need < B_size) {
+// 		errno = ENOMEM;
+// 		return -1;
+// 	}
+// 	XY_size = (size_t)256 * r;
+// #ifdef _OPENMP
+// 	XY_size *= p;
+// #endif
+// 	need += XY_size;
+// 	if (need < XY_size) {
+// 		errno = ENOMEM;
+// 		return -1;
+// 	}
+// 	if (flags & YESCRYPT_PWXFORM) {
+// 		size_t S_size = S_SIZE_ALL;
+// #ifdef _OPENMP
+// 		S_size *= p;
+// #else
+// 		if (flags & YESCRYPT_PARALLEL_SMIX)
+// 			S_size *= p;
+// #endif
+// 		need += S_size;
+// 		if (need < S_size) {
+// 			errno = ENOMEM;
+// 			return -1;
+// 		}
+// 	}
+// 	if (flags & __YESCRYPT_INIT_SHARED) {
+// 		if (!alloc_region(&tmp, need))
+// 			return -1;
+// 		B = (uint8_t *)tmp.aligned;
+// 		XY = (salsa20_blk_t *)((uint8_t *)B + B_size);
+// 	} else {
+// 		init_region(&tmp);
+// 		if (local->aligned_size < need) {
+// 			if (free_region(local))
+// 				return -1;
+// 			if (!alloc_region(local, need))
+// 				return -1;
+// 		}
+// 		B = (uint8_t *)local->aligned;
+// 		V = (salsa20_blk_t *)((uint8_t *)B + B_size);
+// 		XY = (salsa20_blk_t *)((uint8_t *)V + V_size);
+// 	}
+// 	S = NULL;
+// 	if (flags & YESCRYPT_PWXFORM)
+// 		S = (uint8_t *)XY + XY_size;
+//
+// 	if (t || flags) {
+// 		SHA256_CTX ctx;
+// 		SHA256_Init(&ctx);
+// 		SHA256_Update(&ctx, passwd, passwdlen);
+// 		SHA256_Final(sha256, &ctx);
+// 		passwd = sha256;
+// 		passwdlen = sizeof(sha256);
+// 	}
+//
+// 	/* 1: (B_0 ... B_{p-1}) <-- PBKDF2(P, S, 1, p * MFLen) */
+// 	PBKDF2_SHA256(passwd, passwdlen, salt, saltlen, 1, B, B_size);
+//
+// 	if (t || flags)
+// 		memcpy(sha256, B, sizeof(sha256));
+//
+// 	if (p == 1 || (flags & YESCRYPT_PARALLEL_SMIX)) {
+// 		smix(B, r, N, p, t, flags, V, NROM, shared, XY, S);
+// 	} else {
+// 		uint32_t i;
+//
+// 		/* 2: for i = 0 to p - 1 do */
+// #ifdef _OPENMP
+// #pragma omp parallel for default(none) private(i) shared(B, r, N, p, t, flags, V, NROM, shared, XY, S)
+// #endif
+// 		for (i = 0; i < p; i++) {
+// 			/* 3: B_i <-- MF(B_i, N) */
+// #ifdef _OPENMP
+// 			smix(&B[(size_t)128 * r * i], r, N, 1, t, flags,
+// 			    &V[(size_t)2 * r * i * N],
+// 			    NROM, shared,
+// 			    &XY[(size_t)4 * r * i],
+// 			    S ? &S[S_SIZE_ALL * i] : S);
+// #else
+// 			smix(&B[(size_t)128 * r * i], r, N, 1, t, flags, V,
+// 			    NROM, shared, XY, S);
+// #endif
+// 		}
+// 	}
+//
+// 	/* 5: DK <-- PBKDF2(P, B, 1, dkLen) */
+// 	PBKDF2_SHA256(passwd, passwdlen, B, B_size, 1, buf, buflen);
+//
+// 	/*
+// 	 * Except when computing classic scrypt, allow all computation so far
+// 	 * to be performed on the client.  The final steps below match those of
+// 	 * SCRAM (RFC 5802), so that an extension of SCRAM (with the steps so
+// 	 * far in place of SCRAM's use of PBKDF2 and with SHA-256 in place of
+// 	 * SCRAM's use of SHA-1) would be usable with yescrypt hashes.
+// 	 */
+// 	if ((t || flags) && buflen == sizeof(sha256)) {
+// 		/* Compute ClientKey */
+// 		{
+// 			HMAC_SHA256_CTX ctx;
+// 			HMAC_SHA256_Init(&ctx, buf, buflen);
+// 			HMAC_SHA256_Update(&ctx, "Client Key", 10);
+// 			HMAC_SHA256_Final(sha256, &ctx);
+// 		}
+// 		/* Compute StoredKey */
+// 		{
+// 			SHA256_CTX ctx;
+// 			SHA256_Init(&ctx);
+// 			SHA256_Update(&ctx, sha256, sizeof(sha256));
+// 			SHA256_Final(buf, &ctx);
+// 		}
+// 	}
+//
+// 	if (free_region(&tmp))
+// 		return -1;
+//
+// 	/* Success! */
+// 	return 0;
+// }
