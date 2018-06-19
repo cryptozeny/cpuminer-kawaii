@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <openssl/sha.h>
+// #include <openssl/sha.h>
 #include <stdint.h>
 #include <stdlib.h>
 
