@@ -1,18 +1,19 @@
 Raspberry Pi
 ============
 
-cd && sudo apt-get install build-essential autoconf automake libssl-dev libcurl4-openssl-dev libjansson-dev zlib1g-dev screen git && git clone https://github.com/cryptozeny/cpuminer-kawaii.git && cd cpuminer-kawaii && ./autogen.sh && ./nomacro.pl && ./configure --disable-assembly CFLAGS="-Ofast -march=native" --with-crypto --with-curl && make -j8 && ./cpuminer -a yescrypt -o stratum+tcp://zny.mofumofu.me:3331 -u ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v
+cd && sudo apt-get install build-essential autoconf automake libssl-dev libcurl4-openssl-dev libjansson-dev zlib1g-dev screen git && git clone https://github.com/cryptozeny/cpuminer-kawaii.git && cd cpuminer-kawaii && ./autogen.sh && ./configure --disable-assembly CFLAGS="-Ofast -march=native" --with-crypto --with-curl && make -j8
 
 
 Intel or Ryzen
 ==============
- 
- cd && sudo apt-get install build-essential autoconf automake libssl-dev libcurl4-openssl-dev libjansson-dev zlib1g-dev screen git && git clone https://github.com/cryptozeny/cpuminer-kawaii.git && cd cpuminer-kawaii && ./build.sh && ./cpuminer -a yescrypt -o stratum+tcp://zny.mofumofu.me:3331 -u ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v
- 
- 
- Run
- ===
- ./cpuminer -a yescrypt -o stratum+tcp://zny.mofumofu.me:3331 -u ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v
+
+cd && sudo apt-get install build-essential autoconf automake libssl-dev libcurl4-openssl-dev libjansson-dev zlib1g-dev screen git && git clone https://github.com/cryptozeny/cpuminer-kawaii.git && cd cpuminer-kawaii && ./build.sh
+
+
+Run
+===
+
+./cpuminer -a yescrypt -o stratum+tcp://zny.mofumofu.me:3331 -u ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v
 
 
 
@@ -98,7 +99,7 @@ Algorithms
 
 #### Planned support for
  * *scrypt-jane* (YaCoin, CopperBars, Pennies, Tickets, etc..)
- 
+
 Dependencies
 ============
  * libcurl http://curl.haxx.se/libcurl/
@@ -171,7 +172,7 @@ _OR_
    * To use NEON instructions, add `"-mfpu=neon"` to CFLAGS.
  * x86:
    * The miner checks for SSE2 instructions support at runtime, and uses them if they are available.
- * x86-64:	
+ * x86-64:
    * The miner can take advantage of AVX, AVX2 and XOP instructions, but only if both the CPU and the operating system support them.
      * Linux supports AVX starting from kernel version 2.6.30.
      * FreeBSD supports AVX starting with 9.1-RELEASE.
