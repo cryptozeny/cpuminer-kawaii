@@ -1372,7 +1372,8 @@ int yescrypt_kdf(
  		}
  		/* Compute StoredKey */
  		{
- 			SHA256_CTX ctx;
+ 			// SHA256_CTX ctx;
+			SHA256_CTX_Y ctx;
  			SHA256_Init(&ctx);
  			SHA256_Update(&ctx, sha256, sizeof(sha256));
  			SHA256_Final(buf, &ctx);
