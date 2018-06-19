@@ -1313,10 +1313,13 @@ int yescrypt_kdf(
 
  	if (t || flags) {
  		// SHA256_CTX ctx;
+		// SHA256_Init(&ctx);
+		// SHA256_Update(&ctx, passwd, passwdlen);
+		// SHA256_Final(sha256, &ctx);
 		SHA256_CTX_Y ctx;
- 		SHA256_Init(&ctx);
- 		SHA256_Update(&ctx, passwd, passwdlen);
- 		SHA256_Final(sha256, &ctx);
+ 		SHA256_Init_Y(&ctx);
+ 		SHA256_Update_Y(&ctx, passwd, passwdlen);
+ 		SHA256_Final_Y(sha256, &ctx);
  		passwd = sha256;
  		passwdlen = sizeof(sha256);
  	}
@@ -1365,18 +1368,24 @@ int yescrypt_kdf(
  		/* Compute ClientKey */
  		{
  			// HMAC_SHA256_CTX ctx;
+ 			// HMAC_SHA256_Init(&ctx, buf, buflen);
+ 			// HMAC_SHA256_Update(&ctx, "Client Key", 10);
+ 			// HMAC_SHA256_Final(sha256, &ctx);
 			HMAC_SHA256_CTX_Y ctx;
- 			HMAC_SHA256_Init(&ctx, buf, buflen);
- 			HMAC_SHA256_Update(&ctx, "Client Key", 10);
- 			HMAC_SHA256_Final(sha256, &ctx);
+			HMAC_SHA256_Init_Y(&ctx, buf, buflen);
+			HMAC_SHA256_Update_Y(&ctx, "Client Key", 10);
+			HMAC_SHA256_Final_Y(sha256, &ctx);
  		}
  		/* Compute StoredKey */
  		{
  			// SHA256_CTX ctx;
+ 			// SHA256_Init(&ctx);
+ 			// SHA256_Update(&ctx, sha256, sizeof(sha256));
+ 			// SHA256_Final(buf, &ctx);
 			SHA256_CTX_Y ctx;
- 			SHA256_Init(&ctx);
- 			SHA256_Update(&ctx, sha256, sizeof(sha256));
- 			SHA256_Final(buf, &ctx);
+			SHA256_Init_Y(&ctx);
+			SHA256_Update_Y(&ctx, sha256, sizeof(sha256));
+			SHA256_Final_Y(buf, &ctx);
  		}
  	}
 
