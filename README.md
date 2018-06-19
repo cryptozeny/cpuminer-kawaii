@@ -1,7 +1,10 @@
+cpuminer-kawaii : a fork of tpruvot's cpuminer-multi 1.3.4
+==========================================================
+
 Raspberry Pi
 ============
 
-cd && sudo apt-get install build-essential autoconf automake libssl-dev libcurl4-openssl-dev libjansson-dev zlib1g-dev screen git && git clone https://github.com/cryptozeny/cpuminer-kawaii.git && cd cpuminer-kawaii && ./autogen.sh && ./configure --disable-assembly CFLAGS="-Ofast -march=native" --with-crypto --with-curl && make -j8
+cd && sudo apt-get install build-essential autoconf automake libssl-dev libcurl4-openssl-dev libjansson-dev zlib1g-dev screen git && git clone https://github.com/cryptozeny/cpuminer-kawaii.git && cd cpuminer-kawaii && ./build-RPi.sh
 
 
 Intel or Ryzen
@@ -40,6 +43,9 @@ fork of [pooler](//github.com/pooler)'s cpuminer (see AUTHORS for list of contri
 
 Algorithms
 ==========
+#### New algorithms
+ * ✓ __yescrypt__ (BitZeny [ZNY])
+
 #### Currently supported
  * ✓ __scrypt__ (Litecoin, Dogecoin, Feathercoin, ...)
  * ✓ __scrypt:N__
@@ -87,8 +93,10 @@ Algorithms
  * ✓ __x16r__ (Ravencoin [RVN])
  * ✓ __x16s__ (Pigeoncoin [PGN])
  * ✓ __x17__ (Verge [XVG])
- * ✓ __yescrypt__ (GlobalBoostY [BSTY], Unitus [UIS], MyriadCoin [MYR])
  * ✓ __zr5__ (Ziftrcoin [ZRC])
+
+#### Removed
+ *   __yescrypt__ (GlobalBoostY [BSTY], Unitus [UIS], MyriadCoin [MYR])
 
 #### Implemented, but untested
  * ? hefty1 (Heavycoin)
@@ -198,6 +206,9 @@ Donations
 =========
 Donations for the work done in this fork are accepted :
 
+cryptozeny :
+* ZNY: `ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v`
+
 Tanguy Pruvot :
 * BTC: `1FhDPLPpw18X4srecguG3MxJYe4a1JsZnd`
 
@@ -208,6 +219,7 @@ Lucas Jones :
 Credits
 =======
 CPUMiner-multi was forked from pooler's CPUMiner, and has been started by Lucas Jones.
+* [cryptozeny](https://github.com/cryptozeny) added BitZeny yescrypt
 * [tpruvot](https://github.com/tpruvot) added all the recent features and newer algorythmns
 * [Wolf9466](https://github.com/wolf9466) helped with Intel AES-NI support for CryptoNight
 
