@@ -1129,16 +1129,16 @@ yescrypt_kdf(
 	const uint8_t * salt,
 	size_t saltlen,
 
-	// uint64_t N,
-	// uint32_t r,
-	// uint32_t p,
-	// uint32_t t,
+	uint64_t N[2048],
+	uint32_t r[8],
+	uint32_t p[1],
+	uint32_t t[0],
 
-	2048 N,
-	8 r,
-	1 p,
-	0 t,
-	
+	// 2048 N,
+	// 8 r,
+	// 1 p,
+	// 0 t,
+
 	yescrypt_flags_t flags,
 	uint8_t * buf,
 	size_t buflen
