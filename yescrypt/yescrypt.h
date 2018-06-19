@@ -37,8 +37,13 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdlib.h> /* for size_t */
+#include <stdbool.h>
+
+//#define  __SSE4_1__
 
 void yescrypt_hash(const char* input, char* output, uint32_t len);
+
+void yescrypthash(void *output, const void *input);
 
 /**
  * crypto_scrypt(passwd, passwdlen, salt, saltlen, N, r, p, buf, buflen):
@@ -102,6 +107,10 @@ typedef enum {
 	__YESCRYPT_INIT_SHARED_2 = 0x20000,
 	__YESCRYPT_INIT_SHARED = 0x30000
 } yescrypt_flags_t;
+
+extern char *yescrypt_client_key;
+extern int yescrypt_client_key_len;
+
 
 #define YESCRYPT_KNOWN_FLAGS \
 	(YESCRYPT_RW | YESCRYPT_PARALLEL_SMIX | YESCRYPT_PWXFORM | \

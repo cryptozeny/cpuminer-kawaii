@@ -25,6 +25,8 @@
 #include "compat.h"
 
 #include "yescrypt.h"
+#include "sha256_Y.h"
+// #include "algo-gate-api.h"
 
 #define BYTES2CHARS(bytes) \
 	((((bytes) * 8) + 5) / 6)
@@ -333,7 +335,6 @@ static int yescrypt_bsty(const uint8_t * passwd, size_t passwdlen,
 	static __thread yescrypt_shared_t shared;
 	static __thread yescrypt_local_t local;
 	int retval;
-
 	if (!initialized) {
 /* "shared" could in fact be shared, but it's simpler to keep it private
  * along with "local".  It's dummy and tiny anyway. */
@@ -361,10 +362,51 @@ static int yescrypt_bsty(const uint8_t * passwd, size_t passwdlen,
 	return retval;
 }
 
+// 원본
+// scrypt parameters initialized at run time.
+// uint64_t YESCRYPT_N = 2048;
+// uint32_t YESCRYPT_R = 8;
+// uint32_t YESCRYPT_P = 1;
+
+// 테스트
+// int YESCRYPT_N = 2048;
+// int YESCRYPT_R = 8;
+// int YESCRYPT_P = 1;
+// #define YESCRYPT_N 2048
+// #define YESCRYPT_R 8
+// #define YESCRYPT_P 1
+// char *yescrypt_client_key = "Client Key";
+// int yescrypt_client_key_len = 10;
+
+
+
+
+
+// 참고
+// bool register_yescryptr8_algo( algo_gate_t* gate )
+// {
+//    yescrypt_gate_base( gate );
+//    gate->get_max64  = (void*)&yescrypt_get_max64;
+//    yescrypt_client_key = "Client Key";
+//    yescrypt_client_key_len = 10;
+//    YESCRYPT_N = 2048;
+//    YESCRYPT_R = 8;
+//    YESCRYPT_P = 1;
+//    return true;
+// }
+
+
+
 /* main hash 80 bytes input */
-void yescrypt_hash(const char *input, char *output, uint32_t len)
+void yescrypt_hash( const char *input, char *output, uint32_t len )
 {
-	yescrypt_bsty((uint8_t*)input, len, (uint8_t*)input, len, 2048, 8, 1, (uint8_t*)output, 32);
+	// 원본
+	// yescrypt_bsty( (uint8_t*)input, len, (uint8_t*)input, len, YESCRYPT_N,
+	// 							 YESCRYPT_R, YESCRYPT_P, (uint8_t*)output, 32 );
+
+	// 테스트
+   yescrypt_bsty( (uint8_t*)input, len, (uint8_t*)input, len, 2048,
+                  8, 1, (uint8_t*)output, 32 );
 }
 
 /* for util.c test */
@@ -373,3 +415,101 @@ void yescrypthash(void *output, const void *input)
 	yescrypt_hash((char*) input, (char*) output, 80);
 }
 
+// int scanhash_yescrypt( int thr_id, struct work *work, uint32_t max_nonce,
+//                        uint64_t *hashes_done )
+// {
+//         uint32_t _ALIGN(64) vhash[8];
+//         uint32_t _ALIGN(64) endiandata[20];
+//         uint32_t *pdata = work->data;
+//         uint32_t *ptarget = work->target;
+//
+//         const uint32_t Htarg = ptarget[7];
+//         const uint32_t first_nonce = pdata[19];
+//         uint32_t n = first_nonce;
+//
+//         for (int k = 0; k < 19; k++)
+//                 be32enc(&endiandata[k], pdata[k]);
+//
+//         do {
+//                 be32enc(&endiandata[19], n);
+//                 yescrypt_hash((char*) endiandata, (char*) vhash, 80);
+//                 if (vhash[7] < Htarg && fulltest(vhash, ptarget)) {
+//                         work_set_target_ratio( work, vhash );
+//                         *hashes_done = n - first_nonce + 1;
+//                         pdata[19] = n;
+//                         return true;
+//                 }
+//                 n++;
+//         } while (n < max_nonce && !work_restart[thr_id].restart);
+//
+//         *hashes_done = n - first_nonce + 1;
+//         pdata[19] = n;
+//
+//         return 0;
+// }
+
+int64_t yescrypt_get_max64()
+{
+  return 0x1ffLL;
+}
+
+int64_t yescryptr16_get_max64()
+{
+  return 0xfffLL;
+}
+
+// void yescrypt_gate_base(algo_gate_t *gate )
+// {
+//    gate->optimizations = SSE2_OPT | SHA_OPT;
+//    gate->scanhash   = (void*)&scanhash_yescrypt;
+//    gate->hash       = (void*)&yescrypt_hash;
+//    gate->set_target = (void*)&scrypt_set_target;
+// }
+//
+// bool register_yescrypt_algo( algo_gate_t* gate )
+// {
+//    yescrypt_gate_base( gate );
+//    gate->get_max64  = (void*)&yescrypt_get_max64;
+//    yescrypt_client_key = NULL;
+//    yescrypt_client_key_len = 0;
+//    YESCRYPT_N = 2048;
+//    YESCRYPT_R = 8;
+//    YESCRYPT_P = 1;
+//    return true;
+// }
+//
+// bool register_yescryptr8_algo( algo_gate_t* gate )
+// {
+//    yescrypt_gate_base( gate );
+//    gate->get_max64  = (void*)&yescrypt_get_max64;
+//    yescrypt_client_key = "Client Key";
+//    yescrypt_client_key_len = 10;
+//    YESCRYPT_N = 2048;
+//    YESCRYPT_R = 8;
+//    YESCRYPT_P = 1;
+//    return true;
+// }
+//
+// bool register_yescryptr16_algo( algo_gate_t* gate )
+// {
+//    yescrypt_gate_base( gate );
+//    gate->get_max64  = (void*)&yescryptr16_get_max64;
+//    yescrypt_client_key = "Client Key";
+//    yescrypt_client_key_len = 10;
+//    YESCRYPT_N = 4096;
+//    YESCRYPT_R = 16;
+//    YESCRYPT_P = 1;
+//    return true;
+// }
+//
+// bool register_yescryptr32_algo( algo_gate_t* gate )
+// {
+//    yescrypt_gate_base( gate );
+//    gate->get_max64  = (void*)&yescryptr16_get_max64;
+//    yescrypt_client_key = "WaviBanana";
+//    yescrypt_client_key_len = 10;
+//    YESCRYPT_N = 4096;
+//    YESCRYPT_R = 32;
+//    YESCRYPT_P = 1;
+//    return true;
+// }
