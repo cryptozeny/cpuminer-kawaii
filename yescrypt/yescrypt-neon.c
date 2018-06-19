@@ -1141,21 +1141,21 @@ smix(uint8_t * B, size_t r, uint32_t N, uint32_t p, uint32_t t,
 
 
 
-static
+// static
 int yescrypt_kdf(
-	const yescrypt_shared_t * __shared,
-	yescrypt_local_t * __local,
-	const uint8_t * __passwd,
-	size_t __passwdlen,
-	const uint8_t * __salt,
-	size_t __saltlen,
-	uint64_t __N,
-	uint32_t __r,
-	uint32_t __p,
-	uint32_t __t,
-	yescrypt_flags_t __flags,
-	uint8_t * __buf,
-	size_t __buflen
+	const yescrypt_shared_t * shared,
+	yescrypt_local_t * local,
+	const uint8_t * passwd,
+	size_t passwdlen,
+	const uint8_t * salt,
+	size_t saltlen,
+	uint64_t N,
+	uint32_t r,
+	uint32_t p,
+	uint32_t t,
+	yescrypt_flags_t flags,
+	uint8_t * buf,
+	size_t buflen
 )
 
 
