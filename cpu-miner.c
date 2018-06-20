@@ -1084,12 +1084,12 @@ static int share_result(int result, struct work *work, const char *reason)
 		// toFixed
 		// sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", hashrate / 1000.0);
 
-		// diff: suppl / 65536
+		// kH/s >> H/s
 		// sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.4f", hashrate / 1000.0);
+		// applog(LOG_NOTICE, "accepted: %lu/%lu (%s), %s kH/s %s",
 
-		sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.4f", hashrate / 1000.0);
-
-		applog(LOG_NOTICE, "accepted: %lu/%lu (%s), %s kH/s %s",
+		sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.0f", hashrate);
+		applog(LOG_NOTICE, "accepted: %lu/%lu (%s), %s H/s %s",
 			accepted_count, accepted_count + rejected_count,
 			suppl, s, flag);
 		break;
@@ -2450,9 +2450,13 @@ static void *miner_thread(void *userdata)
 			default:
 				// toFixed
 				// sprintf(s, thr_hashrates[thr_id] >= 1e6 ? "%.0f" : "%.2f",
-				sprintf(s, thr_hashrates[thr_id] >= 1e6 ? "%.0f" : "%.4f",
-						thr_hashrates[thr_id] / 1e3);
-				applog(LOG_INFO, "CPU #%d: %s kH/s", thr_id, s);
+				sprintf(s, thr_hashrates[thr_id] >= 1e6 ? "%.0f" : "%.0f",
+
+						// kH/s >> H/s
+						// thr_hashrates[thr_id] / 1e3);
+				// applog(LOG_INFO, "CPU #%d: %s kH/s", thr_id, s);
+						thr_hashrates[thr_id] / 1);
+				applog(LOG_INFO, "CPU #%d: %s H/s", thr_id, s);
 				break;
 			}
 			tm_rate_log = time(NULL);
@@ -2473,8 +2477,12 @@ static void *miner_thread(void *userdata)
 				default:
 					// toFixed
 					// sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", hashrate / 1000);
-					sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.4f", hashrate / 1000);
-					applog(LOG_NOTICE, "Total: %s kH/s", s);
+
+					// kH/s >> H/s
+					// sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.4f", hashrate / 1000);
+					// applog(LOG_NOTICE, "Total: %s kH/s", s);
+					sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.0f", hashrate / 1);
+					applog(LOG_NOTICE, "Total: %s H/s", s);
 					break;
 				}
 				global_hashrate = (uint64_t) hashrate;
@@ -3393,9 +3401,9 @@ static int thread_create(struct thr_info *thr, void* func)
 
 static void show_credits()
 {
-	printf("♥ ♥ ♥ " PACKAGE_NAME " " PACKAGE_VERSION " kawaii by cryptozeny@github ♥ ♥ ♥\n");
+	printf("\n♥ ♥ ♥ " PACKAGE_NAME " " PACKAGE_VERSION " kawaii by cryptozeny@github ♥ ♥ ♥\n");
 	// printf("BTC donation address: 1FhDPLPpw18X4srecguG3MxJYe4a1JsZnd (tpruvot)\n\n");
-	printf("BitZeny (ZNY) donation address: ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v (cryptozeny)\n\n");
+	printf("ZNY donation : ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v (cryptozeny)\n\n");
 }
 
 void get_defconfig_path(char *out, size_t bufsize, char *argv0);
