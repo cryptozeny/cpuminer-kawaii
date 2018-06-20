@@ -1063,9 +1063,9 @@ static int share_result(int result, struct work *work, const char *reason)
 	}
 
 	if (opt_showdiff)
-		// toFixed 3 to 8
+		// toFixed, *65536
 		// sprintf(suppl, "diff %.3f", sharediff);
-		sprintf(suppl, "diff %.8f", sharediff);
+		sprintf(suppl, "diff %.4f", sharediff * 65536.0);
 	else // accepted percent
 		sprintf(suppl, "%.2f%%", 100. * accepted_count / (accepted_count + rejected_count));
 
@@ -1083,7 +1083,12 @@ static int share_result(int result, struct work *work, const char *reason)
 	default:
 		// toFixed
 		// sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", hashrate / 1000.0);
+
+		// diff: suppl / 65536
+		// sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.4f", hashrate / 1000.0);
+
 		sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.4f", hashrate / 1000.0);
+
 		applog(LOG_NOTICE, "accepted: %lu/%lu (%s), %s kH/s %s",
 			accepted_count, accepted_count + rejected_count,
 			suppl, s, flag);
@@ -1842,6 +1847,7 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 			case ALGO_NEOSCRYPT:
 			case ALGO_PLUCK:
 			case ALGO_YESCRYPT:
+				// 확인 *65536.0 if (opt_showdiff)
 				work_set_target(work, sctx->job.diff / (65536.0 * opt_diff_factor));
 				break;
 			case ALGO_ALLIUM:
