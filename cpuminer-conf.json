@@ -4,9 +4,7 @@
 
 	"api-bind" : "127.0.0.1:4048",
 
-	"url" : "",
 	"user" : "",
-	"pass" : "",
 
 	"algo" : "yescrypt",
 	"threads" : 0,

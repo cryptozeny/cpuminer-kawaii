@@ -227,7 +227,9 @@ static int opt_time_limit = 0;
 int opt_timeout = 300;
 static int opt_scantime = 5;
 static const bool opt_time = true;
-static enum algos opt_algo = ALGO_SCRYPT;
+// 기본알고
+// static enum algos opt_algo = ALGO_SCRYPT;
+static enum algos opt_algo = ALGO_YESCRYPT;
 static int opt_scrypt_n = 1024;
 static int opt_pluck_n = 128;
 static unsigned int opt_nfactor = 6;
@@ -302,7 +304,7 @@ static char const usage[] = "\
 Usage: " PACKAGE_NAME " [OPTIONS]\n\
 Options:\n\
   -a, --algo=ALGO       specify the algorithm to use\n\
-													yescrypt     BitZeny (yescrypt: n2048, r8, p1) (default)\n\
+                          yescrypt     BitZeny (yescrypt: n2048, r8, p1) ♥\n\
                           allium       Garlicoin double lyra2\n\
                           axiom        Shabal-256 MemoHash\n\
                           bitcore      Timetravel with 10 algos\n\
