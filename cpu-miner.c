@@ -1024,8 +1024,11 @@ out:
 	return rc;
 }
 
-#define YES "yes!"
-#define YAY "yay!!!"
+// #define YES "yes!"
+// #define YAY "yay!!!"
+// #define BOO "booooo"
+#define YES "yay!"
+#define YAY "kawaii!!!"
 #define BOO "booooo"
 
 static int share_result(int result, struct work *work, const char *reason)
@@ -1053,7 +1056,9 @@ static int share_result(int result, struct work *work, const char *reason)
 	} else {
 		solved_count++;
 		flag = use_colors ?
-			(result ? CL_GRN YAY : CL_RED BOO)
+			// 색깔
+			// (result ? CL_GRN YAY : CL_RED BOO)
+			(result ? CL_CYN YAY : CL_RED BOO)
 		:	(result ? "(" YAY ")" : "(" BOO ")");
 	}
 
@@ -3382,7 +3387,7 @@ static int thread_create(struct thr_info *thr, void* func)
 
 static void show_credits()
 {
-	printf("** " PACKAGE_NAME " " PACKAGE_VERSION " kawaii by cryptozeny@github **\n");
+	printf("♥ ♥ ♥ " PACKAGE_NAME " " PACKAGE_VERSION " kawaii by cryptozeny@github ♥ ♥ ♥\n");
 	// printf("BTC donation address: 1FhDPLPpw18X4srecguG3MxJYe4a1JsZnd (tpruvot)\n\n");
 	printf("BitZeny (ZNY) donation address: ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v (cryptozeny)\n\n");
 }
