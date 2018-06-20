@@ -302,6 +302,7 @@ static char const usage[] = "\
 Usage: " PACKAGE_NAME " [OPTIONS]\n\
 Options:\n\
   -a, --algo=ALGO       specify the algorithm to use\n\
+													yescrypt     BitZeny (yescrypt: n2048, r8, p1) (default)\n\
                           allium       Garlicoin double lyra2\n\
                           axiom        Shabal-256 MemoHash\n\
                           bitcore      Timetravel with 10 algos\n\
@@ -333,7 +334,7 @@ Options:\n\
                           phi2         LUX newer algo\n\
                           quark        Quark\n\
                           qubit        Qubit\n\
-                          scrypt       scrypt(1024, 1, 1) (default)\n\
+                          scrypt       scrypt(1024, 1, 1)\n\
                           scrypt:N     scrypt(N, 1, 1)\n\
                           scrypt-jane:N (with N factor from 4 to 30)\n\
                           shavite3     Shavite3\n\
@@ -355,7 +356,6 @@ Options:\n\
                           x16s         X16S (Pigeon)\n\
                           x17          X17\n\
                           xevan        Xevan (BitSend)\n\
-                          yescrypt     Yescrypt\n\
                           zr5          ZR5\n\
   -o, --url=URL         URL of mining server\n\
   -O, --userpass=U:P    username:password pair for mining server\n\
@@ -1088,7 +1088,7 @@ static int share_result(int result, struct work *work, const char *reason)
 		// sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.4f", hashrate / 1000.0);
 		// applog(LOG_NOTICE, "accepted: %lu/%lu (%s), %s kH/s %s",
 
-		sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.0f", hashrate);
+		sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", hashrate);
 		applog(LOG_NOTICE, "accepted: %lu/%lu (%s), %s H/s %s",
 			accepted_count, accepted_count + rejected_count,
 			suppl, s, flag);
@@ -2450,7 +2450,7 @@ static void *miner_thread(void *userdata)
 			default:
 				// toFixed
 				// sprintf(s, thr_hashrates[thr_id] >= 1e6 ? "%.0f" : "%.2f",
-				sprintf(s, thr_hashrates[thr_id] >= 1e6 ? "%.0f" : "%.0f",
+				sprintf(s, thr_hashrates[thr_id] >= 1e6 ? "%.0f" : "%.2f",
 
 						// kH/s >> H/s
 						// thr_hashrates[thr_id] / 1e3);
@@ -2481,7 +2481,7 @@ static void *miner_thread(void *userdata)
 					// kH/s >> H/s
 					// sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.4f", hashrate / 1000);
 					// applog(LOG_NOTICE, "Total: %s kH/s", s);
-					sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.0f", hashrate / 1);
+					sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", hashrate / 1);
 					applog(LOG_NOTICE, "Total: %s H/s", s);
 					break;
 				}
