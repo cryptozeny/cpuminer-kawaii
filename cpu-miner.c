@@ -304,7 +304,7 @@ static char const usage[] = "\
 Usage: " PACKAGE_NAME " [OPTIONS]\n\
 Options:\n\
   -a, --algo=ALGO       specify the algorithm to use\n\
-                          yescrypt     BitZeny (yescrypt: n2048, r8, p1) ♥\n\
+                          yescrypt     BitZeny (yescrypt: n2048, r8, p1) *default\n\
                           allium       Garlicoin double lyra2\n\
                           axiom        Shabal-256 MemoHash\n\
                           bitcore      Timetravel with 10 algos\n\
