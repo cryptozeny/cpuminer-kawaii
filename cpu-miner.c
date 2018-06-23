@@ -84,8 +84,8 @@ enum algos {
 	ALGO_QUARK,       /* Quark */
 	ALGO_ALLIUM,      /* Garlicoin double lyra2 */
 	ALGO_AXIOM,       /* Shabal 256 Memohash */
+	ALGO_BALLOON,
 	ALGO_BASTION,
-	        ALGO_BALLOON,
 	ALGO_BLAKE,       /* Blake 256 */
 	ALGO_BLAKECOIN,   /* Simplified 8 rounds Blake 256 */
 	ALGO_BLAKE2S,     /* Blake2s */
