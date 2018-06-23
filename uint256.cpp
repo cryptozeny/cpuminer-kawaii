@@ -33,7 +33,8 @@ void work_set_target_ratio(struct work* work, uint32_t* hash)
 		work->shareratio = hash_target_ratio(hash, work->target);
 		work->sharediff = work->targetdiff * work->shareratio;
 		if (opt_debug)
-			applog(LOG_DEBUG, "share diff %.5f (%.1fx)", work->sharediff, work->shareratio);
+			// applog(LOG_DEBUG, "share diff %.5f (%.1fx)", work->sharediff, work->shareratio);
+			applog(LOG_DEBUG, "share diff %.16f (%.1fx)", work->sharediff, work->shareratio);
 	}
 }
 

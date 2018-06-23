@@ -85,6 +85,7 @@ enum algos {
 	ALGO_ALLIUM,      /* Garlicoin double lyra2 */
 	ALGO_AXIOM,       /* Shabal 256 Memohash */
 	ALGO_BASTION,
+	        ALGO_BALLOON,
 	ALGO_BLAKE,       /* Blake 256 */
 	ALGO_BLAKECOIN,   /* Simplified 8 rounds Blake 256 */
 	ALGO_BLAKE2S,     /* Blake2s */
@@ -105,8 +106,8 @@ enum algos {
 	ALGO_MYR_GR,      /* Myriad Groestl */
 	ALGO_NIST5,       /* Nist5 */
 	ALGO_PENTABLAKE,  /* Pentablake */
-	ALGO_PHI1612,
-	ALGO_PHI2,
+	// ALGO_PHI1612,
+	// ALGO_PHI2,
 	ALGO_PLUCK,       /* Pluck (Supcoin) */
 	ALGO_QUBIT,       /* Qubit */
 	ALGO_SCRYPT,      /* scrypt */
@@ -146,6 +147,7 @@ static const char *algo_names[] = {
 	"quark",
 	"allium",
 	"axiom",
+	        "balloon",
 	"bastion",
 	"blake",
 	"blakecoin",
@@ -167,8 +169,8 @@ static const char *algo_names[] = {
 	"myr-gr",
 	"nist5",
 	"pentablake",
-	"phi1612",
-	"phi2",
+	// "phi1612",
+	// "phi2",
 	"pluck",
 	"qubit",
 	"scrypt",
@@ -201,7 +203,8 @@ static const char *algo_names[] = {
 };
 
 bool opt_debug = false;
-bool opt_debug_diff = false;
+// bool opt_debug_diff = false;
+bool opt_debug_diff = true;
 bool opt_protocol = false;
 bool opt_benchmark = false;
 bool opt_redirect = true;
@@ -213,7 +216,8 @@ bool have_gbt = true;
 bool allow_getwork = true;
 bool want_stratum = true;
 bool have_stratum = false;
-bool opt_stratum_stats = false;
+// bool opt_stratum_stats = false;
+bool opt_stratum_stats = true;
 bool allow_mininginfo = true;
 bool use_syslog = false;
 bool use_colors = true;
@@ -229,7 +233,8 @@ static int opt_scantime = 5;
 static const bool opt_time = true;
 // 기본알고
 // static enum algos opt_algo = ALGO_SCRYPT;
-static enum algos opt_algo = ALGO_YESCRYPT;
+// static enum algos opt_algo = ALGO_YESCRYPT;
+static enum algos opt_algo = ALGO_BALLOON;
 static int opt_scrypt_n = 1024;
 static int opt_pluck_n = 128;
 static unsigned int opt_nfactor = 6;
@@ -268,7 +273,7 @@ pthread_mutex_t rpc2_login_lock;
 pthread_mutex_t applog_lock;
 pthread_mutex_t stats_lock;
 uint32_t zr5_pok = 0;
-bool use_roots = false;
+// bool use_roots = false;
 uint32_t solved_count = 0L;
 uint32_t accepted_count = 0L;
 uint32_t rejected_count = 0L;
@@ -609,9 +614,9 @@ static bool work_decode(const json_t *val, struct work *work)
 		allow_mininginfo = false;
 		data_size = 192;
 		adata_sz = 180/4;
-	} else if (use_roots) {
-		data_size = 144;
-		adata_sz = 36;
+	// } else if (use_roots) {
+	// 	data_size = 144;
+	// 	adata_sz = 36;
 	}
 
 	if (jsonrpc_2) {
@@ -664,11 +669,11 @@ static bool work_decode(const json_t *val, struct work *work)
 				algo_names[opt_algo], work->height, netinfo);
 			net_blocks = work->height - 1;
 		}
-	} else if (opt_algo == ALGO_PHI2) {
-		if (work->data[0] & (1<<30)) use_roots = true;
-		else for (i = 20; i < 36; i++) {
-			if (work->data[i]) use_roots = true; break;
-		}
+	// } else if (opt_algo == ALGO_PHI2) {
+	// 	if (work->data[0] & (1<<30)) use_roots = true;
+	// 	else for (i = 20; i < 36; i++) {
+	// 		if (work->data[i]) use_roots = true; break;
+	// 	}
 	}
 
 	return true;
@@ -1067,7 +1072,10 @@ static int share_result(int result, struct work *work, const char *reason)
 	if (opt_showdiff)
 		// toFixed, *65536
 		// sprintf(suppl, "diff %.3f", sharediff);
-		sprintf(suppl, "diff %.4f", sharediff * 65536.0);
+		// 제니
+		// sprintf(suppl, "diff %.4f", sharediff * 65536.0);
+		// 풍선
+		sprintf(suppl, "diff %.8f", sharediff);
 	else // accepted percent
 		sprintf(suppl, "%.2f%%", 100. * accepted_count / (accepted_count + rejected_count));
 
@@ -1322,8 +1330,8 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 		} else if (opt_algo == ALGO_DECRED) {
 			/* bigger data size : 180 + terminal hash ending */
 			data_size = 192;
-		} else if (opt_algo == ALGO_PHI2 && use_roots) {
-			data_size = 144;
+		// } else if (opt_algo == ALGO_PHI2 && use_roots) {
+		// 	data_size = 144;
 		}
 
 		adata_sz = data_size / sizeof(uint32_t);
@@ -1794,16 +1802,17 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 			//applog_hex(&work->data[36], 36);
 		} else if (opt_algo == ALGO_LBRY) {
 			for (i = 0; i < 8; i++)
-				work->data[17 + i] = ((uint32_t*)sctx->job.extra)[i];
+				// work->data[17 + i] = ((uint32_t*)sctx->job.extra)[i];
+				work->data[17 + i] = ((uint32_t*)sctx->job.claim)[i];
 			work->data[25] = le32dec(sctx->job.ntime);
 			work->data[26] = le32dec(sctx->job.nbits);
 			work->data[28] = 0x80000000;
-		} else if (opt_algo == ALGO_PHI2) {
-			work->data[17] = le32dec(sctx->job.ntime);
-			work->data[18] = le32dec(sctx->job.nbits);
-			for (i = 0; i < 16; i++)
-				work->data[20 + i] = ((uint32_t*)sctx->job.extra)[i];
-			//applog_hex(&work->data[0], 144);
+		// } else if (opt_algo == ALGO_PHI2) {
+		// 	work->data[17] = le32dec(sctx->job.ntime);
+		// 	work->data[18] = le32dec(sctx->job.nbits);
+		// 	for (i = 0; i < 16; i++)
+		// 		work->data[20 + i] = ((uint32_t*)sctx->job.extra)[i];
+		// 	//applog_hex(&work->data[0], 144);
 		} else if (opt_algo == ALGO_SIA) {
 			for (i = 0; i < 8; i++) // prevhash
 				work->data[i] = ((uint32_t*)sctx->job.prevhash)[7-i];
@@ -1859,7 +1868,7 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 			case ALGO_KECCAKC:
 			case ALGO_LBRY:
 			case ALGO_LYRA2REV2:
-			case ALGO_PHI2:
+			// case ALGO_PHI2:
 			case ALGO_TIMETRAVEL:
 			case ALGO_BITCORE:
 			case ALGO_XEVAN:
@@ -1883,7 +1892,8 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 				// toFixed
 				// snprintf(sdiff, 32, " (%.5f)", work->targetdiff);
 				snprintf(sdiff, 32, " (%.8f)", work->targetdiff);
-			applog(LOG_WARNING, "Stratum difficulty set to %g%s", stratum_diff, sdiff);
+			// applog(LOG_WARNING, "Stratum difficulty set to %g%s", stratum_diff, sdiff);
+			applog(LOG_WARNING, "Stratum difficulty set to %.8f%s", stratum_diff, sdiff);
 		}
 	}
 }
@@ -2178,6 +2188,7 @@ static void *miner_thread(void *userdata)
 					max64 = 0xF;
 				break;
 			case ALGO_AXIOM:
+																case ALGO_BALLOON:
 			case ALGO_CRYPTOLIGHT:
 			case ALGO_CRYPTONIGHT:
 			case ALGO_SCRYPTJANE:
@@ -2191,8 +2202,8 @@ static void *miner_thread(void *userdata)
 			case ALGO_ALLIUM:
 			case ALGO_LYRA2:
 			case ALGO_LYRA2REV2:
-			case ALGO_PHI1612:
-			case ALGO_PHI2:
+			// case ALGO_PHI1612:
+			// case ALGO_PHI2:
 			case ALGO_TIMETRAVEL:
 			case ALGO_BITCORE:
 			case ALGO_XEVAN:
@@ -2255,6 +2266,9 @@ static void *miner_thread(void *userdata)
 		/* scan nonces for a proof-of-work hash */
 		switch (opt_algo) {
 
+		case ALGO_BALLOON:
+			rc = scanhash_balloon(thr_id, &work, max_nonce, &hashes_done);
+			break;
 		case ALGO_ALLIUM:
 			rc = scanhash_allium(thr_id, &work, max_nonce, &hashes_done);
 			break;
@@ -2333,12 +2347,12 @@ static void *miner_thread(void *userdata)
 		case ALGO_PENTABLAKE:
 			rc = scanhash_pentablake(thr_id, &work, max_nonce, &hashes_done);
 			break;
-		case ALGO_PHI1612:
-			rc = scanhash_phi1612(thr_id, &work, max_nonce, &hashes_done);
-			break;
-		case ALGO_PHI2:
-			rc = scanhash_phi2(thr_id, &work, max_nonce, &hashes_done);
-			break;
+		// case ALGO_PHI1612:
+		// 	rc = scanhash_phi1612(thr_id, &work, max_nonce, &hashes_done);
+		// 	break;
+		// case ALGO_PHI2:
+		// 	rc = scanhash_phi2(thr_id, &work, max_nonce, &hashes_done);
+		// 	break;
 		case ALGO_PLUCK:
 			rc = scanhash_pluck(thr_id,  &work, max_nonce, &hashes_done, scratchbuf, opt_pluck_n);
 			break;
@@ -2426,6 +2440,8 @@ static void *miner_thread(void *userdata)
 		case ALGO_ZR5:
 			rc = scanhash_zr5(thr_id, &work, max_nonce, &hashes_done);
 			break;
+
+
 		default:
 			/* should never happen */
 			goto out;
@@ -2958,8 +2974,8 @@ void parse_arg(int key, char *arg)
 				i = opt_algo = ALGO_LYRA2;
 			else if (!strcasecmp("lyra2v2", arg))
 				i = opt_algo = ALGO_LYRA2REV2;
-			else if (!strcasecmp("phi", arg))
-				i = opt_algo = ALGO_PHI1612;
+			// else if (!strcasecmp("phi", arg))
+			// 	i = opt_algo = ALGO_PHI1612;
 			else if (!strcasecmp("scryptjane", arg))
 				i = opt_algo = ALGO_SCRYPTJANE;
 			else if (!strcasecmp("sibcoin", arg))
