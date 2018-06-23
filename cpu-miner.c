@@ -233,8 +233,8 @@ static int opt_scantime = 5;
 static const bool opt_time = true;
 // 기본알고
 // static enum algos opt_algo = ALGO_SCRYPT;
-// static enum algos opt_algo = ALGO_YESCRYPT;
-static enum algos opt_algo = ALGO_BALLOON;
+static enum algos opt_algo = ALGO_YESCRYPT;
+// static enum algos opt_algo = ALGO_BALLOON;
 static int opt_scrypt_n = 1024;
 static int opt_pluck_n = 128;
 static unsigned int opt_nfactor = 6;
@@ -309,7 +309,8 @@ static char const usage[] = "\
 Usage: " PACKAGE_NAME " [OPTIONS]\n\
 Options:\n\
   -a, --algo=ALGO       specify the algorithm to use\n\
-                          yescrypt     BitZeny (yescrypt: n2048, r8, p1) *default\n\
+                          balloon      DEFT (128kB, 4rounds)\n\
+                          yescrypt     BitZeny (n2048, r8, p1) *default\n\
                           allium       Garlicoin double lyra2\n\
                           axiom        Shabal-256 MemoHash\n\
                           bitcore      Timetravel with 10 algos\n\
@@ -3421,7 +3422,8 @@ static void show_credits()
 {
 	printf("\n♥ ♥ ♥ " PACKAGE_NAME " " PACKAGE_VERSION " kawaii by cryptozeny@github ♥ ♥ ♥\n");
 	// printf("BTC donation address: 1FhDPLPpw18X4srecguG3MxJYe4a1JsZnd (tpruvot)\n\n");
-	printf("ZNY donation : ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v (cryptozeny)\n\n");
+	printf("BitZeny donation : ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v \n");
+	printf("DEFT    donation : dVRAZuWnncMPwbM7tZN4sU73sNx5j92jam \n\n");
 }
 
 void get_defconfig_path(char *out, size_t bufsize, char *argv0);
