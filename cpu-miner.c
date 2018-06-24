@@ -3424,6 +3424,7 @@ static void show_credits()
 	// printf("BTC donation address: 1FhDPLPpw18X4srecguG3MxJYe4a1JsZnd (tpruvot)\n\n");
 	printf("BitZeny donation : ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v \n");
 	printf("DEFT    donation : dVRAZuWnncMPwbM7tZN4sU73sNx5j92jam \n\n");
+	printf("Thanks to tpruvot(cpuminer), macchky(yescrypt), barrystyle(deft), belgarion(balloon) \n\n");
 }
 
 void get_defconfig_path(char *out, size_t bufsize, char *argv0);
