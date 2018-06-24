@@ -3420,7 +3420,7 @@ static int thread_create(struct thr_info *thr, void* func)
 
 static void show_credits()
 {
-	printf("\n♥ ♥ ♥ " PACKAGE_NAME " " PACKAGE_VERSION " kawaii by cryptozeny@github ♥ ♥ ♥\n");
+	printf("\n♥ ♥ ♥ " PACKAGE_NAME " " PACKAGE_VERSION " kawaii by cryptozeny@github ♥ ♥ ♥\n\n");
 	// printf("BTC donation address: 1FhDPLPpw18X4srecguG3MxJYe4a1JsZnd (tpruvot)\n\n");
 	printf("BitZeny donation : ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v \n");
 	printf("DEFT    donation : dVRAZuWnncMPwbM7tZN4sU73sNx5j92jam \n\n");
