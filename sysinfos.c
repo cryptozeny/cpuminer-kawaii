@@ -111,8 +111,8 @@ int cpu_fanpercent()
 	return 0;
 }
 
-// #if !defined(__arm__) && !defined(__aarch64__)
-#if !defined(__aarch64__)
+#if !defined(__arm__) && !defined(__aarch64__)
+// #if !defined(__aarch64__)
 
 static inline void cpuid(int functionnumber, int output[4]) {
 #if defined (_MSC_VER) || defined (__INTEL_COMPILER)
