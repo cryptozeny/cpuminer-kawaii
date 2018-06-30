@@ -6,7 +6,7 @@
 
 	"user" : "",
 
-	"algo" : "yescrypt",
+	"algo" : "balloon",
 	"threads" : 0,
 	"cpu-priority" : 0,
 	"cpu-affinity" : -1,
