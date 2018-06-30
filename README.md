@@ -45,7 +45,8 @@ fork of [pooler](//github.com/pooler)'s cpuminer (see AUTHORS for list of contri
 Algorithms
 ==========
 #### New algorithms
- * ✓ __yescrypt__ (BitZeny [ZNY])
+ * ✓ __balloon__ (DEFT 128kB, 4rounds)
+ * ✓ __yescrypt__ (BitZeny [ZNY] n2048, r8, p1)
 
 #### Currently supported
  * ✓ __scrypt__ (Litecoin, Dogecoin, Feathercoin, ...)
