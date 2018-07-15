@@ -17,7 +17,7 @@ cd && sudo apt-get install build-essential autoconf automake libssl-dev libcurl4
 Run
 ===
 
-./cpuminer -a yescrypt -o stratum+tcp://zny.mofumofu.me:3331 -u ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v
+./cpuminer -a yescrypt -o stratum+tcp://zny.semi-pool.com:3333 -u ZyWJL5qp3qZQW85HVoT3ba2feJYsZ7aQ2v
 
 
 
